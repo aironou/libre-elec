@@ -155,7 +155,7 @@
   KODI_NFS_SUPPORT="yes"
 
 # build with Samba Client support (mounting SAMBA shares with KODI) (yes / no)
-  KODI_SAMBA_SUPPORT="yes"
+  KODI_SAMBA_SUPPORT="no"
 
 # build kodi with alsa support (yes/no)
   KODI_ALSA_SUPPORT="yes"
@@ -200,10 +200,10 @@
   NFS_SUPPORT="yes"
 
 # build with Samba Client support (mounting samba shares via the OS) (yes / no)
-  SAMBA_SUPPORT="yes"
+  SAMBA_SUPPORT="no"
 
 # build and install Samba Server (yes / no)
-  SAMBA_SERVER="yes"
+  SAMBA_SERVER=" no"
 
 # build and install SFTP Server (yes / no)
   SFTP_SERVER="yes"
