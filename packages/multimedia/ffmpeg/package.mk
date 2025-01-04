@@ -11,7 +11,7 @@ PKG_URL="http://ffmpeg.org/releases/ffmpeg-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_TARGET="toolchain zlib bzip2 openssl speex libxml2"
 PKG_DEPENDS_TARGET+=" libx264 lame rtmpdump"
 PKG_LONGDESC="FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
-PKG_PATCH_DIRS="libreelec"
+PKG_PATCH_DIRS="libreelec aironou"
 
 case "${PROJECT}" in
   Amlogic)
