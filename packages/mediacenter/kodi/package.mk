@@ -3,13 +3,19 @@
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="776b0aa053516ccedb56b14b922a337c42ad065a"
-PKG_SHA256="8fed4d9be3ce0dd243a7aefa8c5d22012a06392d71d13bfe0ab04901b189f985"
+PKG_VERSION="2b2d09e2902fa6cff8ceb2da99c9fca87743a509"
+PKG_SHA256="59330b8117906ab3d7c78cb8d827febbcad74732850fe0153f0b848f70fcd56b"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/xbmc/xbmc/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python3 zlib systemd lzo pcre2 swig:host libass curl exiv2 fontconfig fribidi tinyxml tinyxml2 libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid libdvdnav libfmt lirc libfstrcmp flatbuffers:host flatbuffers libudfread spdlog libxkbcommon"
+PKG_DEPENDS_TARGET="toolchain JsonSchemaBuilder:host TexturePacker:host Python3 zlib systemd lzo pcre swig:host libass curl fontconfig fribidi tinyxml tinyxml2 libjpeg-turbo freetype libcdio taglib libxml2 libxslt rapidjson sqlite ffmpeg crossguid libdvdnav libfmt lirc libfstrcmp flatbuffers:host flatbuffers libudfread spdlog"
 PKG_DEPENDS_UNPACK="commons-lang3 commons-text groovy"
+
+if [ "${PROJECT}" = "L4T" -a "${DEVICE}" = "Switch" ]; then
+  # Not really sure why u-power was removed, this is required to get battery statistics in kodi.
+  PKG_DEPENDS_TARGET+=" upower"
+fi
+
 PKG_DEPENDS_HOST="toolchain"
 PKG_LONGDESC="A free and open source cross-platform media player."
 PKG_BUILD_FLAGS="+speed"
@@ -218,7 +224,7 @@ configure_package() {
   fi
 
   if [ ! "${KODIPLAYER_DRIVER}" = "default" -a "${DISPLAYSERVER}" = "no" ]; then
-    PKG_DEPENDS_TARGET+=" ${KODIPLAYER_DRIVER} libinput libdisplay-info"
+    PKG_DEPENDS_TARGET+=" ${KODIPLAYER_DRIVER} libinput libxkbcommon libdisplay-info"
     if [ "${OPENGLES_SUPPORT}" = yes -a "${KODIPLAYER_DRIVER}" = "${OPENGLES}" ]; then
       KODI_PLATFORM="-DCORE_PLATFORM_NAME=gbm -DAPP_RENDER_SYSTEM=gles"
       CFLAGS+=" -DEGL_NO_X11"
@@ -244,15 +250,14 @@ configure_package() {
                          -DWITH_JSONSCHEMABUILDER=${TOOLCHAIN}/bin/JsonSchemaBuilder \
                          -DSWIG_EXECUTABLE=${TOOLCHAIN}/bin/swig \
                          -DPYTHON_EXECUTABLE=${TOOLCHAIN}/bin/${PKG_PYTHON_VERSION} \
+                         -DPYTHON_INCLUDE_DIRS=${SYSROOT_PREFIX}/usr/include/${PKG_PYTHON_VERSION} \
                          -DGIT_VERSION=${PKG_VERSION} \
                          -DFFMPEG_PATH=${SYSROOT_PREFIX}/usr \
-                         -DENABLE_INTERNAL_CROSSGUID=OFF \
-                         -DENABLE_INTERNAL_EXIV2=OFF \
                          -DENABLE_INTERNAL_FFMPEG=OFF \
-                         -DENABLE_INTERNAL_FLATBUFFERS=OFF \
-                         -DENABLE_INTERNAL_RapidJSON=OFF \
-                         -DENABLE_INTERNAL_SPDLOG=OFF \
+                         -DENABLE_INTERNAL_CROSSGUID=OFF \
                          -DENABLE_INTERNAL_UDFREAD=OFF \
+                         -DENABLE_INTERNAL_SPDLOG=OFF \
+                         -DENABLE_INTERNAL_RapidJSON=OFF \
                          -DENABLE_UDEV=ON \
                          -DENABLE_DBUS=ON \
                          -DENABLE_XSLT=ON \
@@ -262,12 +267,12 @@ configure_package() {
                          -DENABLE_DEBUGFISSION=OFF \
                          -DENABLE_APP_AUTONAME=OFF \
                          -DENABLE_TESTING=OFF \
+                         -DENABLE_INTERNAL_FLATBUFFERS=OFF \
                          -DENABLE_LCMS2=OFF \
                          -DADDONS_CONFIGURE_AT_STARTUP=OFF \
                          -Dgroovy_SOURCE_DIR=$(get_build_dir groovy) \
                          -Dapache-commons-lang_SOURCE_DIR=$(get_build_dir commons-lang3) \
                          -Dapache-commons-text_SOURCE_DIR=$(get_build_dir commons-text) \
-                         -DPCRE2_USE_STATIC_LIBS=ON \
                          ${PKG_KODI_USE_LTO} \
                          ${PKG_KODI_LINKER} \
                          ${KODI_ARCH} \
@@ -367,8 +372,8 @@ post_makeinstall_target() {
   fi
 
   # nvidia: Enable USLEEP to reduce CPU load while rendering
-  if listcontains "${GRAPHIC_DRIVERS}" "nvidia"; then
-    echo "__GL_YIELD=USLEEP" >> ${INSTALL}/usr/lib/kodi/kodi.conf
+  if listcontains "${GRAPHIC_DRIVERS}" "nvidia" || listcontains "${GRAPHIC_DRIVERS}" "nvidia-legacy"; then
+    echo "__GL_YIELD=USLEEP" >>${INSTALL}/usr/lib/kodi/kodi.conf
   fi
 
   mkdir -p ${INSTALL}/usr/sbin
