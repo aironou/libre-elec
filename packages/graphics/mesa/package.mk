@@ -41,6 +41,7 @@ PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dlmsensors=disabled \
                        -Dbuild-tests=false \
                        -Ddraw-use-llvm=false \
+                       -Dllvm=disabled \
                        -Dmicrosoft-clc=disabled \
                        -Dosmesa=false"
 
@@ -60,12 +61,9 @@ elif [ "${DISPLAYSERVER}" = "wl" ]; then
   PKG_DEPENDS_TARGET+=" wayland wayland-protocols"
   PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland \
                            -Dglx=disabled"
-elif [ "${DISTRO}" = "Lakka" -o "${PROJECT}" = "L4T" ]; then
+else
   PKG_DEPENDS_TARGET+=" libglvnd"
   PKG_MESON_OPTS_TARGET+=" -Dplatforms="" -Dglx=disabled -Dglvnd=true"
-else
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" \
-                           -Dglx=disabled"
 fi
 
 if listcontains "${GRAPHIC_DRIVERS}" "etnaviv"; then
@@ -81,16 +79,7 @@ if listcontains "${GRAPHIC_DRIVERS}" "(nvidia|nvidia-ng)"; then
   PKG_DEPENDS_TARGET+=" libglvnd"
   PKG_MESON_OPTS_TARGET+=" -Dglvnd=enabled"
 else
-  if [ ! "${DISTRO}" = "Lakka" -a ! "${PROJECT}" = "L4T" ]; then
-    PKG_MESON_OPTS_TARGET+=" -Dglvnd=disabled"
-  fi
-fi
-
-if [ "${LLVM_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" elfutils llvm"
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=enabled"
-else
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dglvnd=disabled"
 fi
 
 if [ "${VDPAU_SUPPORT}" = "yes" -a "${DISPLAYSERVER}" = "x11" ]; then
