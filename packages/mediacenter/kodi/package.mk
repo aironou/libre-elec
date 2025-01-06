@@ -114,25 +114,9 @@ configure_package() {
     PKG_PATCH_DIRS+=" cec-framework"
   fi
 
-  if [ "${KODI_OPTICAL_SUPPORT}" = yes ]; then
-    KODI_OPTICAL="-DENABLE_OPTICAL=ON"
-  else
-    KODI_OPTICAL="-DENABLE_OPTICAL=OFF"
-  fi
-
-  if [ "${KODI_DVDCSS_SUPPORT}" = yes ]; then
-    KODI_DVDCSS="-DENABLE_DVDCSS=ON \
-                 -DLIBDVDCSS_URL=${SOURCES}/libdvdcss/libdvdcss-$(get_pkg_version libdvdcss).tar.gz"
-  else
-    KODI_DVDCSS="-DENABLE_DVDCSS=OFF"
-  fi
-
-  if [ "${KODI_BLURAY_SUPPORT}" = yes ]; then
-    PKG_DEPENDS_TARGET+=" libbluray"
-    KODI_BLURAY="-DENABLE_BLURAY=ON"
-  else
-    KODI_BLURAY="-DENABLE_BLURAY=OFF"
-  fi
+  KODI_OPTICAL="-DENABLE_OPTICAL=OFF"
+  KODI_DVDCSS="-DENABLE_DVDCSS=OFF"
+  KODI_BLURAY="-DENABLE_BLURAY=OFF"
 
   if [ "${AVAHI_DAEMON}" = yes ]; then
     PKG_DEPENDS_TARGET+=" avahi nss-mdns"
@@ -155,19 +139,8 @@ configure_package() {
       ;;
   esac
 
-  if [ "${KODI_AIRPLAY_SUPPORT}" = yes ]; then
-    PKG_DEPENDS_TARGET+=" libplist"
-    KODI_AIRPLAY="-DENABLE_PLIST=ON"
-  else
-    KODI_AIRPLAY="-DENABLE_PLIST=OFF"
-  fi
-
-  if [ "${KODI_AIRTUNES_SUPPORT}" = yes ]; then
-    PKG_DEPENDS_TARGET+=" libshairplay"
-    KODI_AIRTUNES="-DENABLE_AIRTUNES=ON"
-  else
-    KODI_AIRTUNES="-DENABLE_AIRTUNES=OFF"
-  fi
+  KODI_AIRPLAY="-DENABLE_PLIST=OFF"
+  KODI_AIRTUNES="-DENABLE_AIRTUNES=OFF"
 
   if [ "${KODI_NFS_SUPPORT}" = yes ]; then
     PKG_DEPENDS_TARGET+=" libnfs"
@@ -176,12 +149,7 @@ configure_package() {
     KODI_NFS="-DENABLE_NFS=OFF"
   fi
 
-  if [ "${KODI_SAMBA_SUPPORT}" = yes ]; then
-    PKG_DEPENDS_TARGET+=" samba"
-    KODI_SAMBA="-DENABLE_SMBCLIENT=ON"
-  else
-    KODI_SAMBA="-DENABLE_SMBCLIENT=OFF"
-  fi
+  KODI_SAMBA="-DENABLE_SMBCLIENT=OFF"
 
   if [ "${KODI_WEBSERVER_SUPPORT}" = yes ]; then
     PKG_DEPENDS_TARGET+=" libmicrohttpd"
