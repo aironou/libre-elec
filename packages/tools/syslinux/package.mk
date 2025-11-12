@@ -5,7 +5,6 @@
 PKG_NAME="syslinux"
 PKG_VERSION="6.03"
 PKG_SHA256="26d3986d2bea109d5dc0e4f8c4822a459276cf021125e8c9f23c3cca5d8c850e"
-PKG_ARCH="x86_64"
 PKG_LICENSE="GPL"
 PKG_SITE="http://syslinux.zytor.com/"
 PKG_URL="http://www.kernel.org/pub/linux/utils/boot/${PKG_NAME}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
@@ -58,8 +57,6 @@ makeinstall_host() {
   mkdir -p ${TOOLCHAIN}/share/syslinux
     cp bios/mbr/mbr.bin ${TOOLCHAIN}/share/syslinux
     cp bios/mbr/gptmbr.bin ${TOOLCHAIN}/share/syslinux
-    cp efi64/efi/syslinux.efi ${TOOLCHAIN}/share/syslinux/bootx64.efi
-    cp efi64/com32/elflink/ldlinux/ldlinux.e64  ${TOOLCHAIN}/share/syslinux
 }
 
 makeinstall_target() {
@@ -71,6 +68,4 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/share/syslinux
     cp bios/mbr/mbr.bin ${INSTALL}/usr/share/syslinux
     cp bios/mbr/gptmbr.bin ${INSTALL}/usr/share/syslinux
-    cp efi64/efi/syslinux.efi ${INSTALL}/usr/share/syslinux/bootx64.efi
-    cp efi64/com32/elflink/ldlinux/ldlinux.e64  ${INSTALL}/usr/share/syslinux
 }

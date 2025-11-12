@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="24.3.2"
-PKG_SHA256="ad9f5f3a6d2169e4786254ee6eb5062f746d11b826739291205d360f1f3ff716"
+PKG_VERSION="24.3.1"
+PKG_SHA256="9c795900449ce5bc7c526ba0ab3532a22c3c951cab7e0dd9de5fcac41b0843af"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://mesa.freedesktop.org/archive/mesa-${PKG_VERSION}.tar.xz"
@@ -41,6 +41,7 @@ PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dlmsensors=disabled \
                        -Dbuild-tests=false \
                        -Ddraw-use-llvm=false \
+                       -Dllvm=disabled \
                        -Dmicrosoft-clc=disabled \
                        -Dosmesa=false"
 
@@ -49,13 +50,20 @@ if [ "${DISPLAYSERVER}" = "x11" ]; then
   export X11_INCLUDES=
   PKG_MESON_OPTS_TARGET+=" -Dplatforms=x11 \
                            -Dglx=dri"
+  if [ "${DEVICE}" = "Odin" ]; then
+     PKG_MESON_OPTS_TARGET+=" -Dglx-direct=true"
+  fi
+  if [ "${PROJECT}" = "L4T" ]; then
+    PKG_DEPENDS_TARGET+=" libglvnd"
+    PKG_MESON_OPTS_TARGET+=" -Dglvnd=true"
+  fi
 elif [ "${DISPLAYSERVER}" = "wl" ]; then
   PKG_DEPENDS_TARGET+=" wayland wayland-protocols"
   PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland \
                            -Dglx=disabled"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" \
-                           -Dglx=disabled"
+  PKG_DEPENDS_TARGET+=" libglvnd"
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" -Dglx=disabled -Dglvnd=true"
 fi
 
 if listcontains "${GRAPHIC_DRIVERS}" "etnaviv"; then
@@ -74,13 +82,6 @@ else
   PKG_MESON_OPTS_TARGET+=" -Dglvnd=disabled"
 fi
 
-if [ "${LLVM_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" elfutils llvm"
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=enabled"
-else
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=disabled"
-fi
-
 if [ "${VDPAU_SUPPORT}" = "yes" -a "${DISPLAYSERVER}" = "x11" ]; then
   PKG_DEPENDS_TARGET+=" libvdpau"
   PKG_MESON_OPTS_TARGET+=" -Dgallium-vdpau=enabled"
@@ -96,7 +97,7 @@ else
   PKG_MESON_OPTS_TARGET+=" -Dgallium-va=disabled"
 fi
 
-if listcontains "${GRAPHIC_DRIVERS}" "vmware"; then
+if listcontains "${GRAPHIC_DRIVERS}" "vmware" || listcontains "${GRAPHIC_DRIVERS}" "freedreno"; then
   PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=enabled"
 else
   PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=disabled"
@@ -115,7 +116,17 @@ else
   PKG_MESON_OPTS_TARGET+=" -Dvulkan-drivers="
 fi
 
+if [ "${ARCH}" = "i386" ]; then
+  TARGET_ARCH="x86"
+  TARGET_SUBARCH="x86"
+fi
+
 makeinstall_host() {
   mkdir -p "${TOOLCHAIN}/bin"
     cp -a src/intel/compiler/intel_clc "${TOOLCHAIN}/bin"
+}
+post_makeinstall_target() {
+  if [ "${PROJECT}" = "L4T" ]; then
+    safe_remove ${INSTALL}/usr/lib/libgbm.so.1
+  fi
 }
